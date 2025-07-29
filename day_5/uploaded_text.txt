@@ -1,0 +1,35 @@
+Language Translation
+
+ABSTRACT
+Speech recognition is one of the fastest-growing engineering technologies. It has several applications in different areas, and provides many potential benefits. A lot of people are unable to communicate due to language barriers. We aim to reduce this barrier via our project, which was designed and developed to achieve systems in particular cases to provide significant help so people can share information by operating a computer using voice input. This project keeps that factor in mind, and an effort is made to ensure our project is able to recognize speech and convert input audio into text; it also enables a user to perform file operations like Save, Open, or Exit from voice-only input. We design a system that can recognize the human voice as well as audio clips, and translate between English. The output is in text form, and we provide options to convert audio from one language. Going forward, we expect to add functionality that provides dictionary meanings for English words. Neural machine translation is the primary algorithm used in the industry to perform machine translation. This work on speech recognition starts with an introduction to the technology and the applications used in different sectors. Part of the report is based on software developments in speech recognition.
+
+
+
+
+
+
+
+INTRODUCTION
+• Speech recognition is a rapidly emerging technology with applications in various domains, including accessibility, automation, and communication. It allows users to interact with computers and other devices using voice commands, eliminating the need for traditional input methods such as typing.
+• One of the major challenges in communication is the language barrier, which can hinder effective communication. Our project aims to address this issue by developing a system that recognizes speech, converts audio to text, and allows users to perform file operations such as opening, saving, and exiting using voice-only input.
+• The proposed system is designed to recognize human speech and audio clips and translate spoken language into text. In addition, it provides the option to convert audio between different languages. As a future development, we plan to integrate a dictionary feature that provides meanings for English words and further improve the usability.
+• Neural Machine Translation (NMT) serves as the primary mechanism for handling machine translation tasks in this project. This study explores the technical foundations of speech recognition, its various applications, and the latest software developments in the field. We aim to leverage advances in speech processing to create a user-friendly, efficient, and accessible solution for seamless communication.
+
+
+OBJECTIVE
+The task's goal is to make it feasible for speakers of different dialects to talk with each other with next to no obstructions. With the utilization of this innovation, individuals will actually want to convey successfully in various settings, including travel, conferences, client support, and social experiences.
+
+
+
+
+
+
+
+LITERATURE REVIEW
+Literature survey is the most important step in software development process. Before developing the tool it is necessary to determine the time factor, economy and company strength. Once these things are satisfied, then the next step is to determine which operating system and language can be used for developing the tool. Once the programmers start building the tool the programmers need lot of external support. This support can be obtained from senior programmers, from book or from websites. Before building the system the above consideration are taken into account for developing the proposed system. The major part of the project development sector considers and fully survey all the required needs for developing the project. For every project Literature survey is the most important sector in software development process. Before developing the tools and the associated designing it is necessary to determine and survey the time factor, resource requirement, man power, economy, and company strength. Once these things are satisfied and fully surveyed, then the next step is to determine about the software specifications in the respective system such as what type of operating system the project would require, and what are all the necessary software are needed to proceed with the next step such as developing the tools, and the associated operations.
+
+Real time text-to speech conversion system for Spanish
+Research aiming to develop a text-to-speech converter (TSC) for Spanish, that accepts a continuous source of alphanumeric characters (up to 250 words per minute) and produces good quality, natural Spanish output, is described. Four sets of problems are considered in this work: the hard-ware structure adopted for real time operation; the complex control software needed to handle the orthographic input and linguistic programs; the linguistic processing rules, and the parametrization of the Spanish language matched to a TSC. Emphasis is made on the problems of adapting a general hardware structure to a specific language.
+
+Hindi-English Speech-to-Speech Translation System for Travel Expressions
+Speech-to-speech translation system enables in translation of speech signals in a source language A to target language B. A good speech-to-speech translation (S2ST) system can be characterized by its ability to keep intact the fluency and meaning of the original speech input. An S2ST system to enable translation between Hindi and English is the main idea of the proposed work. A preliminary dataset concentrating on basic travel expressions in both the languages considered is used for this work. In order to develop a successful S2ST system three subsystems are required namely, automatic speech recognition (ASR) system, machine translation (MT) system and text-to-speech synthesis (TTS) system. Hidden Markov models based ASR system is developed for both the languages and their performances are analyzed based on the word error rate (WER). The MT subsystem makes use of the statistical machine translation (SMT) approach for the purpose of translating the text between the two languages involved. The SMT makes use of IBM alignment models and language models to enable proper translation. The performance of MT is analyzed based on translated edit rate (TER) and analysis of the translation table. HMM-based speech synthesis system (HTS) is used to synthesize the translated text. Performance of the synthesizer is analyzed based on mean opinion score (MOS) from a group of listeners
