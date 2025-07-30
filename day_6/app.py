@@ -3,18 +3,18 @@ import pandas as pd
 import numpy as np
 from sentence_transformers import SentenceTransformer, util
 
-# Load embedding model
+# Load better model
 @st.cache_resource
 def load_model():
-    return SentenceTransformer("all-MiniLM-L6-v2")
+    return SentenceTransformer("all-mpnet-base-v2")  # upgraded for better performance
 
 model = load_model()
 
 st.set_page_config(page_title="RAG-lite Evaluation", layout="wide")
-st.title("🔍 RAG-lite: Recursive vs Sliding Chunking")
-st.markdown("Upload chunked CSVs, ask a question, and manually evaluate the best-matched chunks.")
+st.title("🔍 RAG-lite: Recursive vs Sliding Chunking (Auto Evaluation)")
+st.markdown("Upload your chunked `.csv` files and enter a question. We’ll auto-evaluate using semantic similarity!")
 
-# Upload CSVs
+# Upload files
 file1 = st.file_uploader("📄 Upload Chunked CSV 1 (Recursive)", type="csv")
 file2 = st.file_uploader("📄 Upload Chunked CSV 2 (Sliding)", type="csv")
 
@@ -45,30 +45,49 @@ if file1 and file2:
 
         col1, col2 = st.columns(2)
 
+        # ---- Recursive
         with col1:
             st.subheader("🧩 Recursive Chunking")
             sim_scores = util.cos_sim(query_embedding, emb1)[0]
             top_idx = np.argmax(sim_scores)
-            top_chunk = texts1[top_idx]
+            recursive_answer = texts1[top_idx]
             top_score = sim_scores[top_idx].item()
 
             st.markdown(f"**🔹 Best Match Score:** `{top_score:.4f}`")
-            st.text_area("📄 Retrieved Answer", top_chunk, height=200, key="recursive_text")
-            is_correct = st.radio("Is the answer correct?", ["Yes", "No"], key="recursive_eval")
-            f1_recursive = 1.0 if is_correct == "Yes" else 0.0
-            st.metric("F1 Score", f"{f1_recursive:.2f}")
+            st.text_area("📄 Retrieved Answer", recursive_answer, height=200, key="recursive_text")
 
+        # ---- Sliding
         with col2:
             st.subheader("📦 Sliding Chunking")
             sim_scores = util.cos_sim(query_embedding, emb2)[0]
             top_idx = np.argmax(sim_scores)
-            top_chunk = texts2[top_idx]
+            sliding_answer = texts2[top_idx]
             top_score = sim_scores[top_idx].item()
 
             st.markdown(f"**🔹 Best Match Score:** `{top_score:.4f}`")
-            st.text_area("📄 Retrieved Answer", top_chunk, height=200, key="sliding_text")
-            is_correct = st.radio("Is the answer correct?", ["Yes", "No"], key="sliding_eval")
-            f1_sliding = 1.0 if is_correct == "Yes" else 0.0
-            st.metric("F1 Score", f"{f1_sliding:.2f}")
+            st.text_area("📄 Retrieved Answer", sliding_answer, height=200, key="sliding_text")
+
+        # ---- Evaluation
+        st.divider()
+        st.subheader("📊 Auto Evaluation using Semantic Similarity")
+
+        emb_recursive = model.encode(recursive_answer, convert_to_tensor=True)
+        emb_sliding = model.encode(sliding_answer, convert_to_tensor=True)
+
+        # Semantic Precision, Recall, F1
+        precision = util.pytorch_cos_sim(emb_sliding, emb_recursive).item()
+        recall = util.pytorch_cos_sim(emb_recursive, emb_sliding).item()
+        f1 = (2 * precision * recall) / (precision + recall + 1e-8)
+
+        # Summary Table
+        metrics_df = pd.DataFrame({
+            "Chunking Method": ["Recursive", "Sliding"],
+            "Answer Text": [recursive_answer[:100] + "...", sliding_answer[:100] + "..."],
+            "Precision (vs each other)": [1.0, round(precision, 4)],
+            "Recall (vs each other)": [1.0, round(recall, 4)],
+            "F1 Score": [1.0, round(f1, 4)]
+        })
+
+        st.table(metrics_df)
 else:
     st.info("👆 Please upload both Recursive and Sliding chunked CSV files.")

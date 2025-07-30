@@ -9,88 +9,102 @@ from langchain_text_splitters import (
 from langchain_community.embeddings import HuggingFaceEmbeddings
 from langchain_community.vectorstores import FAISS
 from langchain.chains import RetrievalQA
-from transformers import pipeline
 from langchain_community.llms import HuggingFacePipeline
+from transformers import pipeline
+from sentence_transformers import SentenceTransformer, util
+import pandas as pd
 
-st.set_page_config(page_title="RAG Evaluation: All Chunking Methods", layout="wide")
-st.title("📊 Compare Chunking Methods: Fixed-size vs Recursive vs SentenceSplitter")
+# Streamlit app config
+st.set_page_config(page_title="RAG Chunking Evaluation", layout="wide")
+st.title("🔍 Chunking Methods Evaluation with Semantic Metrics")
 
+# Upload & input
 uploaded_file = st.file_uploader("📄 Upload a `.txt` file", type=["txt"])
 question = st.text_input("❓ Enter your question:")
 
 if uploaded_file and question:
+    # Save uploaded content temporarily
     with tempfile.NamedTemporaryFile(delete=False, suffix=".txt", mode="w", encoding="utf-8") as tmp:
         content = uploaded_file.read().decode("utf-8", errors="ignore")
         tmp.write(content)
         temp_file_path = tmp.name
 
-    try:
-        loader = TextLoader(temp_file_path, encoding="utf-8")
-        docs = loader.load()
-        st.success("✅ File loaded and question received.")
-    except Exception as e:
-        st.error(f"❌ Failed to load file: {e}")
-        st.stop()
+    # Load and prepare
+    loader = TextLoader(temp_file_path, encoding="utf-8")
+    docs = loader.load()
+    
+    # Embeddings
+    rag_embeddings = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
+    semantic_model = SentenceTransformer("all-MiniLM-L6-v2")  # Needed for semantic similarity
 
-    # Common LLM & embedding setup
-    embeddings = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
-    pipe = pipeline("text2text-generation", model="google/flan-t5-small")
-    llm = HuggingFacePipeline(pipeline=pipe)
+    # LLM pipeline
+    llm_pipeline = pipeline("text2text-generation", model="google/flan-t5-base")
+    llm = HuggingFacePipeline(pipeline=llm_pipeline)
 
-    # Layout with 3 columns
+    # Define chunking strategies
+    chunking_strategies = {
+        "Fixed-size": CharacterTextSplitter(chunk_size=500, chunk_overlap=50),
+        "Recursive": RecursiveCharacterTextSplitter(chunk_size=500, chunk_overlap=50),
+        "Sentence Splitter": SentenceTransformersTokenTextSplitter(tokens_per_chunk=128, chunk_overlap=20)
+    }
+
+    # Run all methods
+    answers = {}
+    st.info("⏳ Generating answers for each chunking method...")
+
+    for label, splitter in chunking_strategies.items():
+        chunks = splitter.split_documents(docs)
+        db = FAISS.from_documents(chunks, rag_embeddings)
+        chain = RetrievalQA.from_chain_type(llm=llm, retriever=db.as_retriever(), return_source_documents=True)
+        response = chain.invoke(question)
+        answer = response['result']
+        answers[label] = answer
+
+    # Display answers
+    st.subheader("📝 Answers from Each Chunking Method")
     col1, col2, col3 = st.columns(3)
+    for label, col in zip(answers.keys(), [col1, col2, col3]):
+        with col:
+            st.markdown(f"**{label}**")
+            st.write(answers[label])
 
-    with col1:
-        st.subheader("📦 Fixed-size Chunking")
-        fixed_splitter = CharacterTextSplitter(chunk_size=500, chunk_overlap=50)
-        fixed_chunks = fixed_splitter.split_documents(docs)
-        st.write(f"Chunks created: {len(fixed_chunks)}")
+    # -----------------------------------
+    # Auto Evaluation (Semantic Metrics)
+    # -----------------------------------
+    st.divider()
+    st.subheader("📊 Automatic Evaluation Summary (Semantic Similarity)")
 
-        fixed_db = FAISS.from_documents(fixed_chunks, embeddings)
-        fixed_chain = RetrievalQA.from_chain_type(llm=llm, retriever=fixed_db.as_retriever(), return_source_documents=True)
+    reference_label = "Recursive"  # Use Recursive as the base reference
+    reference_vector = semantic_model.encode(answers[reference_label], convert_to_tensor=True)
 
-        with st.spinner("🔍 Answering using Fixed-size Chunking..."):
-            fixed_result = fixed_chain.invoke(question)
-        st.success("Answer (Fixed-size):")
-        st.write(fixed_result['result'])
+    evaluation = {
+        "Chunking Method": [],
+        "Avg Similarity to Others": [],
+        "Precision (vs Recursive)": [],
+        "Recall (vs Recursive)": [],
+        "F1 Score (vs Recursive)": []
+    }
 
-        correct_fixed = st.radio("Is the answer correct?", ["Yes", "No"], key="fixed_eval")
-        f1_fixed = 1.0 if correct_fixed == "Yes" else 0.0
-        st.metric("F1 Score", f"{f1_fixed:.2f}")
+    for label in answers:
+        current_vector = semantic_model.encode(answers[label], convert_to_tensor=True)
 
-    with col2:
-        st.subheader("🧩 Recursive Chunking")
-        recursive_splitter = RecursiveCharacterTextSplitter(chunk_size=500, chunk_overlap=50)
-        recursive_chunks = recursive_splitter.split_documents(docs)
-        st.write(f"Chunks created: {len(recursive_chunks)}")
+        # Avg similarity to all other methods
+        other_vectors = [
+            semantic_model.encode(answers[other], convert_to_tensor=True)
+            for other in answers if other != label
+        ]
+        avg_sim = sum([util.pytorch_cos_sim(current_vector, v).item() for v in other_vectors]) / len(other_vectors)
 
-        recursive_db = FAISS.from_documents(recursive_chunks, embeddings)
-        recursive_chain = RetrievalQA.from_chain_type(llm=llm, retriever=recursive_db.as_retriever(), return_source_documents=True)
+        # Precision, Recall, F1 (vs Recursive)
+        precision = util.pytorch_cos_sim(current_vector, reference_vector).item()
+        recall = util.pytorch_cos_sim(reference_vector, current_vector).item()
+        f1 = (2 * precision * recall) / (precision + recall + 1e-8)
 
-        with st.spinner("🔍 Answering using Recursive Chunking..."):
-            recursive_result = recursive_chain.invoke(question)
-        st.success("Answer (Recursive):")
-        st.write(recursive_result['result'])
+        evaluation["Chunking Method"].append(label)
+        evaluation["Avg Similarity to Others"].append(round(avg_sim, 4))
+        evaluation["Precision (vs Recursive)"].append(round(precision, 4))
+        evaluation["Recall (vs Recursive)"].append(round(recall, 4))
+        evaluation["F1 Score (vs Recursive)"].append(round(f1, 4))
 
-        correct_recursive = st.radio("Is the answer correct?", ["Yes", "No"], key="recursive_eval")
-        f1_recursive = 1.0 if correct_recursive == "Yes" else 0.0
-        st.metric("F1 Score", f"{f1_recursive:.2f}")
-
-    with col3:
-        st.subheader("✂️ Sentence Splitter Chunking")
-        sentence_splitter = SentenceTransformersTokenTextSplitter(tokens_per_chunk=128, chunk_overlap=20)
-        sentence_chunks = sentence_splitter.split_documents(docs)
-        st.write(f"Chunks created: {len(sentence_chunks)}")
-
-        sentence_db = FAISS.from_documents(sentence_chunks, embeddings)
-        sentence_chain = RetrievalQA.from_chain_type(llm=llm, retriever=sentence_db.as_retriever(), return_source_documents=True)
-
-        with st.spinner("🔍 Answering using Sentence Splitter..."):
-            sentence_result = sentence_chain.invoke(question)
-        st.success("Answer (Sentence Splitter):")
-        st.write(sentence_result['result'])
-
-        correct_sentence = st.radio("Is the answer correct?", ["Yes", "No"], key="sentence_eval")
-        f1_sentence = 1.0 if correct_sentence == "Yes" else 0.0
-        st.metric("F1 Score", f"{f1_sentence:.2f}")
-
+    df = pd.DataFrame(evaluation)
+    st.table(df)
