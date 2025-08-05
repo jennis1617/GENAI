@@ -1,0 +1,5 @@
+{"query": "What is Python?", "reference": "Python is a general-purpose programming language that emphasizes readability and productivity."}
+{"query": "What is Django?", "reference": "Django is a high-level Python web framework that encourages rapid development and clean design."}
+{"query": "What is FastAPI?", "reference": "FastAPI is a Python framework for building APIs quickly with automatic OpenAPI documentation."}
+{"query": "What is React used for?", "reference": "React is a JavaScript library for building user interfaces."}
+{"query": "What is Docker?", "reference": "Docker is a platform that allows developers to build, deploy, and run applications inside containers."}

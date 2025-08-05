@@ -1,0 +1,46 @@
+Great! Since you've uploaded tutorial URLs from core areas like Python, Flask, Django, FastAPI, React, Pandas, NumPy, TensorFlow, PyTorch, and Docker — you can now query a wide range of questions across:
+
+?? General Questions Across All Topics
+1. "Summarize the key learning from each tutorial."
+2. "What is the best order to learn these technologies for a full-stack ML developer?"
+3. "Compare Flask, Django, and FastAPI with pros and cons."
+4. "How is TensorFlow different from PyTorch?"
+5. "What role does Docker play in deploying applications built with these technologies?"
+
+?? Python Specific
+* "What are Python's key data structures?"
+* "How does Python manage memory internally?"
+* "Explain list comprehensions with examples."
+
+?? Flask, Django, FastAPI
+* "How do routing mechanisms differ in Flask, Django, and FastAPI?"
+* "Show how to build a REST API in FastAPI."
+* "What are Django models and how do they work?"
+
+?? Pandas and NumPy
+* "How do Pandas DataFrames differ from NumPy arrays?"
+* "Show examples of data cleaning in Pandas."
+* "Explain broadcasting in NumPy with code."
+
+?? TensorFlow and PyTorch
+* "How do you define and train a model in TensorFlow?"
+* "What is autograd in PyTorch?"
+* "Compare model serialization in TensorFlow and PyTorch."
+
+?? React
+* "What is the virtual DOM in React?"
+* "Explain useState and useEffect hooks with examples."
+* "How is state management done in React?"
+
+?? Docker
+* "How to Dockerize a FastAPI + PyTorch app?"
+* "Explain the difference between Dockerfile and docker-compose."
+* "What is a Docker volume and when do you use it?"
+
+?? Advanced or Role-Based Prompts
+* "As a data scientist, how can I use FastAPI to deploy a model?"
+* "How do React and Flask integrate in a full-stack app?"
+* "Give me a step-by-step guide to build and deploy a ML model using Pandas, TensorFlow, and Docker."
+
+Would you like me to generate sample queries or automate the chunk + query process inside your RAG system with one of these examples?
+

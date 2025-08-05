@@ -1,0 +1,10 @@
+https://docs.python.org/3/tutorial/index.html
+https://flask.palletsprojects.com/en/3.0.x/
+https://docs.djangoproject.com/en/stable/intro/
+https://fastapi.tiangolo.com/tutorial/
+https://react.dev/learn
+https://pandas.pydata.org/docs/getting_started/index.html
+https://numpy.org/doc/stable/user/quickstart.html
+https://www.tensorflow.org/tutorials
+https://pytorch.org/tutorials/
+https://docs.docker.com/get-started/
